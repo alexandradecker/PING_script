@@ -4,8 +4,9 @@ code and data for income related gaps in children's cognitive mediated by anteri
 
 data:
 
-nc_data
+nc_data.csv
 
 code:
 
 nature_communications_script.Rmd
+
