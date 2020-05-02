@@ -2,6 +2,8 @@
 
 code and data for income related gaps in children's cognitive mediated by anterior not posterior hippocampus
 
+## Files
+
 data:
 
 nc_data.csv
