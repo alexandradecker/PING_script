@@ -511,7 +511,7 @@ pingSubset[round_age > 12.999 & round_age < 17.99, age_categorical:= "13:17"]
 pingSubset[round_age > 17.99, age_categorical:= "18:21"]
 
 pingSubset$age_categorical <- relevel(as.factor(pingSubset$age_categorical), ref = "13:17")
-pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc), summaryh(lm(TBX_ibam_scr ~ posterior_hpc  * Age_cat + GenderEC))]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc), summaryh(lm(TBX_ibam_scr ~ posterior_hpc  * age_categorical + GenderEC))]
 
 #in discrete age bins
 pingSubset[!is.na(posterior_hpc)&!is.na(anterior_hpc) & age_categorical %in% c("3:7"), summaryh(lm(TBX_ibam_scr ~ posterior_hpc+ GenderEC))]
@@ -528,7 +528,7 @@ language_anterior_age_interaction.m = lm(TBX_VOCAB_THETA ~  AgeC * anterior_hpc 
 language_posterior_age_interaction.m = lm(TBX_VOCAB_THETA ~  AgeC * posterior_hpc + GenderEC, data = pingSubset[!is.na(anterior_hpc)]); summaryh(language_posterior_age_interaction.m)
 
 pingSubset$age_categorical <- relevel(as.factor(pingSubset$age_categorical), ref = "8:12")
-pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc), summaryh(lm(TBX_VOCAB_THETA ~ posterior_hpc  * Age_cat  + GenderEC))] #controlling for age
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc), summaryh(lm(TBX_VOCAB_THETA ~ posterior_hpc  * age_categorical  + GenderEC))] #controlling for age
 
 #in discrete age bins
 pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & age_categorical %in% c("3:7"), summaryh(lm(TBX_VOCAB_THETA ~ posterior_hpc + GenderEC))]
