@@ -7,29 +7,30 @@ editor_options:
 
 Load relevant packages and data
 ```{r}
-library(broom); library(lme4); library(lmerTest); library(mediation); library(tidyverse); library(data.table); library(dplyr); library(ggbeeswarm); library(mediation); library(data.table); library(hausekeep)
-
+library(lme4); library(lmerTest); library(mediation); library(tidyverse); library(data.table); library(hausekeep)
+#package versions
+#lme4_1.1-18-1; lmerTest_3.1-0; mediation_4.4.7; dtplyr_0.0.3; tidyverse_1.2.1; data.table_1.12.6; tidyr_1.0.0;  ggplot2_3.2.0;    
 #read csv
 pingSubset <- fread("nc_data.csv")
 ```
 
 #### Analyses to assess whether income is related to episodic memory and language scores ####
 ```{r memory ~ income models}
-Income_memory.m <- lm(TBX_ibam_scr ~ logIncome3 +AgeC + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)]); summary(Income_memory.m)
+Income_memory.m <- lm(TBX_ibam_scr ~ logIncome3 +AgeC + GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summary(Income_memory.m)
 
-Income_memory_nonlinear.m <- lm(TBX_ibam_scr ~ logIncome3 +AgeC + Age2 + Age3 + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)]); summaryh(Income_memory_nonlinear.m)
+Income_memory_nonlinear.m <- lm(TBX_ibam_scr ~ logIncome3 +AgeC + Age2 + Age3 + GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summaryh(Income_memory_nonlinear.m)
 #income significantly correlates with memory in both models
 ```
 
 ```{r vocabulary ~ income models}
-Income_language.m <- lm(TBX_VOCAB_THETA ~ logIncome3 + GenderEC + AgeC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)]); summary(Income_language.m)
+Income_language.m <- lm(TBX_VOCAB_THETA ~ logIncome3 + GenderEC + AgeC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summary(Income_language.m)
 
-Income_language.m_nonlinear <- lm(TBX_VOCAB_THETA ~ logIncome3 + GenderEC + AgeC + Age2, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)]); summaryh(Income_language.m_nonlinear)
+Income_language.m_nonlinear <- lm(TBX_VOCAB_THETA ~ logIncome3 + GenderEC + AgeC + Age2, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summaryh(Income_language.m_nonlinear)
 #vocab significantly correlates with memory in both models
 ```
 
 ```{r processing speed ~ income models (control analysis)}
-processingspeed_income.m <- lm(TBX_pspac_scr~ logIncome3 + GenderEC + AgeC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & !is.na(TBX_ibam_scr)]); summary(processingspeed_income.m) 
+processingspeed_income.m <- lm(TBX_pspac_scr~ logIncome3 + GenderEC + AgeC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & !is.na(TBX_ibam_scr)]); summary(processingspeed_income.m) 
 #control analysis - income significantly correlates with processing speed
 ```
 
@@ -75,11 +76,11 @@ language_lag_years = (languageZ_highestIncome -  languageZ_lowestIncome)/age_int
 
 Models testing whether age moderates income-cognition relationships  
 ```{r memory ~ income * age}
-Income_memory_age.m <- lm(TBX_ibam_scr ~ AgeC * logIncome3 + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)]); summaryh(Income_memory_age.m)
+Income_memory_age.m <- lm(TBX_ibam_scr ~ AgeC * logIncome3 + GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summaryh(Income_memory_age.m)
 ```
 
 ```{r vocab ~ income * age}
-Income_language_age.m <- lm(TBX_VOCAB_THETA ~  AgeC * logIncome3 + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)]); summaryh(Income_language_age.m)
+Income_language_age.m <- lm(TBX_VOCAB_THETA ~  AgeC * logIncome3 + GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summaryh(Income_language_age.m)
 ```
 
 ```{r FDR correction (scores ~ income * age)}
@@ -89,16 +90,16 @@ age_inter_income_scores <- data.table(test = c("age_inter_income_memory", "age_i
 Does income correlate with  memory and vocab more than processing speed control?
 ```{r put all variables on the same scale}
 #z score all cognitive scores
-pingSubset[!is.na(head_adjustRO_new) & !is.na(TBX_ibam_scr) & !is.na(tail_adjustRO_new), TBX_ibam_scr_C := scale(TBX_ibam_scr)]
-pingSubset[!is.na(head_adjustRO_new) & !is.na(TBX_ibam_scr) & !is.na(tail_adjustRO_new), TBX_VOCAB_THETA_C := scale(TBX_VOCAB_THETA)]
-pingSubset[!is.na(head_adjustRO_new) & !is.na(TBX_ibam_scr) & !is.na(tail_adjustRO_new) & !is.na(TBX_pspac_scr), TBX_pspac_scr_C := scale(TBX_pspac_scr)]
+pingSubset[!is.na(anterior_hpc) & !is.na(TBX_ibam_scr) & !is.na(posterior_hpc), TBX_ibam_scr_C := scale(TBX_ibam_scr)]
+pingSubset[!is.na(anterior_hpc) & !is.na(TBX_ibam_scr) & !is.na(posterior_hpc), TBX_VOCAB_THETA_C := scale(TBX_VOCAB_THETA)]
+pingSubset[!is.na(anterior_hpc) & !is.na(TBX_ibam_scr) & !is.na(posterior_hpc) & !is.na(TBX_pspac_scr), TBX_pspac_scr_C := scale(TBX_pspac_scr)]
 ```
 
 ```{r create long form data}
-subset_long = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & !is.na(TBX_ibam_scr_C) & !is.na(TBX_pspac_scr_C), .(ID, logIncome3, TBX_ibam_scr_C, TBX_VOCAB_THETA_C, TBX_pspac_scr_C, head_adjustRO_new, DeviceSerialNumber, AgeC, GenderEC)] #subset variables of interest and convert to long form
+subset_long = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & !is.na(TBX_ibam_scr_C) & !is.na(TBX_pspac_scr_C), .(ID, logIncome3, TBX_ibam_scr_C, TBX_VOCAB_THETA_C, TBX_pspac_scr_C, anterior_hpc, DeviceSerialNumber, AgeC, GenderEC)] #subset variables of interest and convert to long form
 subset_long = setDT(subset_long)
 subset_long[, n_distinct(ID)]
-subset_long = gather(subset_long, task, score, -c(ID, logIncome3, head_adjustRO_new, DeviceSerialNumber, AgeC, GenderEC))
+subset_long = gather(subset_long, task, score, -c(ID, logIncome3, anterior_hpc, DeviceSerialNumber, AgeC, GenderEC))
 subset_long = subset_long%>%arrange(ID) 
 subset_long = tbl_dt(subset_long)
 subset_long[, n_distinct(ID)]
@@ -119,17 +120,17 @@ ks.test(x = values, y = normally_dist_values)
 
 Cognitive scores ~ income * income subsample
 ```{r memory ~ income * income subsample}
-Income_memory_income_subsample.m <- lm(TBX_ibam_scr ~ income3 * incomeSplit + AgeC + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)]); summary(Income_memory_income_subsample.m)
+Income_memory_income_subsample.m <- lm(TBX_ibam_scr ~ income3 * incomeSplit + AgeC + GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summary(Income_memory_income_subsample.m)
 ##income (in raw dollars) has a larger effect on memory in lower income subsample
 ```
 
 ```{r vocab ~ income * incomesubsample}
-Income_language_income_subsample.m <- lm(TBX_VOCAB_THETA ~ income3 * incomeSplit + AgeC + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)]); summary(Income_language_income_subsample.m)
+Income_language_income_subsample.m <- lm(TBX_VOCAB_THETA ~ income3 * incomeSplit + AgeC + GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summary(Income_language_income_subsample.m)
 #income (in raw dollars) has a larger effect on vocab in lower income subsample
 ```
 
 ```{r processing speed ~ income * income subsample }
-Income_processing_speed_income_subsample.m <- lm(TBX_pspac_scr ~ income3 * incomeSplit + AgeC + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)]); summary(Income_processing_speed_income_subsample.m)
+Income_processing_speed_income_subsample.m <- lm(TBX_pspac_scr ~ income3 * incomeSplit + AgeC + GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summary(Income_processing_speed_income_subsample.m)
 #income (in raw dollars) does not affect processing speed differently in higher and lower income subsample
 ```
 
@@ -144,24 +145,24 @@ corrected_ps <- rbind(age_inter_income_scores, group_inter_income_scores)
 Cognitive scores ~ income + age + sex + income separately for low and high income subsample
 ```{r memory ~ income separately for low and high income subsamples}
 #low income (linear effect of age only)
-Income_memory_income_subsample_low.m <- lm(TBX_ibam_scr ~ logIncome3 + AgeC + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & incomeSplit == -1]); summary(Income_memory_income_subsample_low.m)
+Income_memory_income_subsample_low.m <- lm(TBX_ibam_scr ~ logIncome3 + AgeC + GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == -1]); summary(Income_memory_income_subsample_low.m)
 
 #low income (added nonlinear effect of age)
-Income_memory_income_subsample_low.m_nonlinear <- lm(TBX_ibam_scr ~ logIncome3 + AgeC + Age2 +GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & incomeSplit == -1]); summaryh(Income_memory_income_subsample_low.m_nonlinear)
+Income_memory_income_subsample_low.m_nonlinear <- lm(TBX_ibam_scr ~ logIncome3 + AgeC + Age2 +GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == -1]); summaryh(Income_memory_income_subsample_low.m_nonlinear)
 
 #high income
-Income_memory_income_subsample_high.m <- lm(TBX_ibam_scr ~ logIncome3 + AgeC  + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & incomeSplit == 1]); summary(Income_memory_income_subsample_high.m)
+Income_memory_income_subsample_high.m <- lm(TBX_ibam_scr ~ logIncome3 + AgeC  + GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == 1]); summary(Income_memory_income_subsample_high.m)
 ```
 
 ```{r vocabulary ~ income separately for low and high income subsamples}
 #lower income group (linear effect of age only)_
-Income_language_low_income.m <- lm(TBX_VOCAB_THETA ~ logIncome3 + GenderEC + AgeC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & incomeSplit == -1]); summary(Income_language_low_income.m)
+Income_language_low_income.m <- lm(TBX_VOCAB_THETA ~ logIncome3 + GenderEC + AgeC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == -1]); summary(Income_language_low_income.m)
 
 #lower income gorup (added nonlinear effect of age)
-Income_language_low_income.m_nonlinear <- lm(TBX_VOCAB_THETA ~ logIncome3 + GenderEC + AgeC + Age2, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & incomeSplit == -1]); summaryh(Income_language_low_income.m_nonlinear)
+Income_language_low_income.m_nonlinear <- lm(TBX_VOCAB_THETA ~ logIncome3 + GenderEC + AgeC + Age2, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == -1]); summaryh(Income_language_low_income.m_nonlinear)
 
 #higher income group
-Income_language_high_income.m <- lm(TBX_VOCAB_THETA ~ logIncome3 + GenderEC + AgeC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & incomeSplit == 1]); summaryh(Income_language_high_income.m)
+Income_language_high_income.m <- lm(TBX_VOCAB_THETA ~ logIncome3 + GenderEC + AgeC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == 1]); summaryh(Income_language_high_income.m)
 ```
 
 ```{r FDR correction (scores ~ income) in separate subsamples}
@@ -176,34 +177,34 @@ Control analysis: Adding minority status as covariate and interaction term
 ```{r memory scores ~ income + minority status; and * minority status}
 #interaction with minority status
 #full
-Income_memory_minority_moderation.m <- lm(TBX_ibam_scr ~ logIncome3 * minority_status +AgeC+ GenderEC , data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)]); summaryh(Income_memory_minority_moderation.m)
+Income_memory_minority_moderation.m <- lm(TBX_ibam_scr ~ logIncome3 * minority_status +AgeC+ GenderEC , data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summaryh(Income_memory_minority_moderation.m)
 
 #low income
-Income_memory_minority_moderation.m_low_income <- lm(TBX_ibam_scr ~ logIncome3 * minority_status +AgeC+ GenderEC , data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & incomeSplit == -1]); summaryh(Income_memory_minority_moderation.m_low_income)
+Income_memory_minority_moderation.m_low_income <- lm(TBX_ibam_scr ~ logIncome3 * minority_status +AgeC+ GenderEC , data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == -1]); summaryh(Income_memory_minority_moderation.m_low_income)
 
 #control for minority status
 #full sample
-Income_memory_minority.m_full <- lm(TBX_ibam_scr ~ logIncome3 +AgeC + GenderEC + minority_status, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)]); summaryh(Income_memory_minority.m_full)
+Income_memory_minority.m_full <- lm(TBX_ibam_scr ~ logIncome3 +AgeC + GenderEC + minority_status, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summaryh(Income_memory_minority.m_full)
 
 #lower income subsample
-Income_memory_minority.m_lower_subsample <- lm(TBX_ibam_scr ~ logIncome3 +AgeC + GenderEC + minority_status, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & incomeSplit == -1]); summaryh(Income_memory_minority.m_lower_subsample)
+Income_memory_minority.m_lower_subsample <- lm(TBX_ibam_scr ~ logIncome3 +AgeC + GenderEC + minority_status, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == -1]); summaryh(Income_memory_minority.m_lower_subsample)
 ```
 
 ```{r vocabulary scores ~ income + minority status; and * minority status}
 #moderation with minority status
 #full
-Income_language_minority_moderation.m <- lm(TBX_VOCAB_THETA ~ logIncome3 * minority_status+ GenderEC + AgeC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)]); summaryh(Income_language_minority_moderation.m)
+Income_language_minority_moderation.m <- lm(TBX_VOCAB_THETA ~ logIncome3 * minority_status+ GenderEC + AgeC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summaryh(Income_language_minority_moderation.m)
 
 #low income
-Income_language_minority_moderation.m_low_income_subsample <- lm(TBX_VOCAB_THETA ~ logIncome3 * minority_status+ GenderEC + AgeC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & incomeSplit == -1]); summaryh(Income_language_minority_moderation.m_low_income_subsample)
+Income_language_minority_moderation.m_low_income_subsample <- lm(TBX_VOCAB_THETA ~ logIncome3 * minority_status+ GenderEC + AgeC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == -1]); summaryh(Income_language_minority_moderation.m_low_income_subsample)
 
 
 #control for minority status
 #full
-Income_language_minority.m_full <- lm(TBX_VOCAB_THETA ~ logIncome3 + GenderEC + AgeC +minority_status, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)]); summaryh(Income_language_minority.m_full)
+Income_language_minority.m_full <- lm(TBX_VOCAB_THETA ~ logIncome3 + GenderEC + AgeC +minority_status, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summaryh(Income_language_minority.m_full)
 
 #low income
-Income_language_minority.m_low_subsample <- lm(TBX_VOCAB_THETA ~ logIncome3 + GenderEC + AgeC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & incomeSplit == -1]); summaryh(Income_language_minority.m_low_subsample)
+Income_language_minority.m_low_subsample <- lm(TBX_VOCAB_THETA ~ logIncome3 + GenderEC + AgeC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == -1]); summaryh(Income_language_minority.m_low_subsample)
 ```
 
 ```{r FDR correction (scores ~ income * minority status)}
@@ -217,18 +218,18 @@ corrected_ps <- rbind(corrected_ps, minority_inter_income_scores)
 Cognitive scores ~ income separately for minority status and non minority status individuals in low income subgroup
 ```{r memory scores ~ income by minority status in lower income}
 #non minority status
-Income_memory_nonminority.m <- lm(TBX_ibam_scr ~ logIncome3 +AgeC+ GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & incomeSplit == -1 & minority_status == -1]); summaryh(Income_memory_nonminority.m)
+Income_memory_nonminority.m <- lm(TBX_ibam_scr ~ logIncome3 +AgeC+ GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == -1 & minority_status == -1]); summaryh(Income_memory_nonminority.m)
 
 #minority status
-Income_memory_minority_status.m <- lm(TBX_ibam_scr ~ logIncome3 +AgeC+ GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & incomeSplit == -1 & minority_status == 1]); summary(Income_memory_minority_status.m)
+Income_memory_minority_status.m <- lm(TBX_ibam_scr ~ logIncome3 +AgeC+ GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == -1 & minority_status == 1]); summary(Income_memory_minority_status.m)
 ```
 
 ```{r vocabulary scores ~ income by minority status in lower income}
 #non minority status
-Income_language_nonminority_low.m <- lm(TBX_VOCAB_THETA ~ logIncome3 + GenderEC + AgeC , data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & incomeSplit == -1 & minority_status == -1]); summaryh(Income_language_nonminority_low.m)
+Income_language_nonminority_low.m <- lm(TBX_VOCAB_THETA ~ logIncome3 + GenderEC + AgeC , data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == -1 & minority_status == -1]); summaryh(Income_language_nonminority_low.m)
 
 #minority status
-Income_language_minority_low.m <- lm(TBX_VOCAB_THETA ~ logIncome3 + GenderEC + AgeC , data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & incomeSplit == -1 & minority_status == 1]); summaryh(Income_language_minority_low.m)
+Income_language_minority_low.m <- lm(TBX_VOCAB_THETA ~ logIncome3 + GenderEC + AgeC , data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == -1 & minority_status == 1]); summaryh(Income_language_minority_low.m)
 ```
 
 ```{r FDR correction (scores ~ income + minority status) in lower}
@@ -242,13 +243,13 @@ corrected_ps[, ps_adjusted := p.adjust(ps, method  = 'fdr')]
 #### Analyses to assess whether income correlates with anterior or posterior hippocampal volumes ####
 Subregion volumes ~ income models
 ```{r anterior vols ~ income}
-Income_anterior.m <- lm(head_adjustRO_new ~ logIncome3 + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(tail_adjustRO_new)]); summary(Income_anterior.m)
+Income_anterior.m <- lm(anterior_hpc ~ logIncome3 + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(posterior_hpc)]); summary(Income_anterior.m)
 
 pingSubset[, .(GenderEC, Gender)]
 ```
 
 ```{r posterior vols ~ income}
-Income_posterior.m <- lm(tail_adjustRO_new ~ logIncome3 + AgeC  + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(head_adjustRO_new)]); summary(Income_posterior.m)
+Income_posterior.m <- lm(posterior_hpc ~ logIncome3 + AgeC  + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(anterior_hpc)]); summary(Income_posterior.m)
 ```
 
 ```{r FDR correction (vols ~ income )}
@@ -258,11 +259,11 @@ corrected_ps[, adjusted := p.adjust(ps, method = "fdr")]
  
 Age moderations of subregion vols ~ income models
 ```{r anterior vols ~ income * age}
-Income_anterior_age.m <- lm(head_adjustRO_new ~ logIncome3 * AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(tail_adjustRO_new)]); summary(Income_anterior_age.m)
+Income_anterior_age.m <- lm(anterior_hpc ~ logIncome3 * AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(posterior_hpc)]); summary(Income_anterior_age.m)
 ```
 
 ```{r posterior vols ~ income * age}
-Income_posterior_age.m <- lm(tail_adjustRO_new ~ AgeC * logIncome3 + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(head_adjustRO_new)]); summary(Income_posterior_age.m)
+Income_posterior_age.m <- lm(posterior_hpc ~ AgeC * logIncome3 + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(anterior_hpc)]); summary(Income_posterior_age.m)
 ```
 
 ```{r FDR correction (vol ~ income * age) }
@@ -272,11 +273,11 @@ corrected_ps[, adjusted := p.adjust(ps, method = "fdr")]
  
 Income subsample moderations of subregion vols ~ income models
 ```{r anterior vols ~ income * income subsample}
-Income_anterior_interaction_income.m <- lm(head_adjustRO_new ~ income3 * incomeSplit + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(tail_adjustRO_new)]); summary(Income_anterior_interaction_income.m) #results show that gains in income (in raw dollars) matter more for low than high subsample
+Income_anterior_interaction_income.m <- lm(anterior_hpc ~ income3 * incomeSplit + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(posterior_hpc)]); summary(Income_anterior_interaction_income.m) #results show that gains in income (in raw dollars) matter more for low than high subsample
 ```
 
 ```{r posterior vols ~ income * income subsample}
-Income_posterior_interaction_income.m <- lm(tail_adjustRO_new ~ income3 * incomeSplit+ AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(head_adjustRO_new)]); summary(Income_posterior_interaction_income.m)
+Income_posterior_interaction_income.m <- lm(posterior_hpc ~ income3 * incomeSplit+ AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(anterior_hpc)]); summary(Income_posterior_interaction_income.m)
 ```
 
 ```{r FDR correction (vol ~ income * subsample) }
@@ -290,18 +291,18 @@ corrected_ps <- rbind(age_inter_income_vols, group_inter_income_vols)
 HPC subregion ~ income separately for higher and lower income subsample
 ```{r anterior ~ income separately for high and low income subsample}
 #low income
-Income_anterior_low_income.m <- lm(head_adjustRO_new ~ logIncome3 + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == -1]); summary(Income_anterior_low_income.m)
+Income_anterior_low_income.m <- lm(anterior_hpc ~ logIncome3 + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(posterior_hpc) & incomeSplit == -1]); summary(Income_anterior_low_income.m)
 
 #high income
-Income_anterior_high_income.m <- lm(head_adjustRO_new ~ logIncome3 + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == 1]); summaryh(Income_anterior_high_income.m)
+Income_anterior_high_income.m <- lm(anterior_hpc ~ logIncome3 + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(posterior_hpc) & incomeSplit == 1]); summaryh(Income_anterior_high_income.m)
 ```
 
 ```{r posterior ~ income separately for high and low income subsample}
 # low income
-Income_posterior_low_income.m <- lm(tail_adjustRO_new ~ logIncome3 + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(head_adjustRO_new) & incomeSplit == -1]); summary(Income_posterior_low_income.m)
+Income_posterior_low_income.m <- lm(posterior_hpc ~ logIncome3 + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(anterior_hpc) & incomeSplit == -1]); summary(Income_posterior_low_income.m)
 
 #high income
-Income_posterior_high_income.m <- lm(tail_adjustRO_new ~ logIncome3 + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(head_adjustRO_new) & incomeSplit == 1]); summary(Income_posterior_high_income.m)
+Income_posterior_high_income.m <- lm(posterior_hpc ~ logIncome3 + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(anterior_hpc) & incomeSplit == 1]); summary(Income_posterior_high_income.m)
 
 ```
 
@@ -316,27 +317,27 @@ corrected_ps <- rbind(corrected_ps, income_vols_group)
 HPC subregion ~ income * minority status for full sample and lower income subsample
 ```{r anterior hpc ~ income * minority status}
 #full sample 
-Income_anterior_minority_status_interaction.m <- lm(head_adjustRO_new ~ logIncome3 * minority_status + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(tail_adjustRO_new)]); summary(Income_anterior_minority_status_interaction.m)
+Income_anterior_minority_status_interaction.m <- lm(anterior_hpc ~ logIncome3 * minority_status + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(posterior_hpc)]); summary(Income_anterior_minority_status_interaction.m)
 
 #lower income
-Income_anterior_minority_status_interaction_low_income.m <- lm(head_adjustRO_new ~ logIncome3 * minority_status + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == -1]); summary(Income_anterior_minority_status_interaction_low_income.m)
+Income_anterior_minority_status_interaction_low_income.m <- lm(anterior_hpc ~ logIncome3 * minority_status + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(posterior_hpc) & incomeSplit == -1]); summary(Income_anterior_minority_status_interaction_low_income.m)
 
 #lower income nminority status
-Income_anterior_minority_status_low_income.m <- lm(head_adjustRO_new ~ logIncome3+ AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == -1 & minority_status == 1]); summary(Income_anterior_minority_status_low_income.m)
+Income_anterior_minority_status_low_income.m <- lm(anterior_hpc ~ logIncome3+ AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(posterior_hpc) & incomeSplit == -1 & minority_status == 1]); summary(Income_anterior_minority_status_low_income.m)
 
 #lower income nonminority status
-Income_anterior_nonminority_status_low_income.m <- lm(head_adjustRO_new ~ logIncome3+ AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == -1 & minority_status == -1]); summary(Income_anterior_nonminority_status_low_income.m)
+Income_anterior_nonminority_status_low_income.m <- lm(anterior_hpc ~ logIncome3+ AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(posterior_hpc) & incomeSplit == -1 & minority_status == -1]); summary(Income_anterior_nonminority_status_low_income.m)
 
 #higher income
-Income_anterior_minority_status_interaction_high_income.m <- lm(head_adjustRO_new ~ logIncome3 * minority_status + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == 1]); summary(Income_anterior_minority_status_interaction_high_income.m)
+Income_anterior_minority_status_interaction_high_income.m <- lm(anterior_hpc ~ logIncome3 * minority_status + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(posterior_hpc) & incomeSplit == 1]); summary(Income_anterior_minority_status_interaction_high_income.m)
 ```
 
 ```{r posterior hpc vols ~ income * minority status}
 #full sample
-Income_posterior_minority_status_interaction.m <- lm(tail_adjustRO_new ~ logIncome3 * minority_status+ AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(head_adjustRO_new)]); summary(Income_posterior_minority_status_interaction.m)
+Income_posterior_minority_status_interaction.m <- lm(posterior_hpc ~ logIncome3 * minority_status+ AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(anterior_hpc)]); summary(Income_posterior_minority_status_interaction.m)
 
 #lower income only - posterior
-Income_posterior_minority_status_interaction_low_income.m <- lm(tail_adjustRO_new ~ logIncome3 * minority_status+ AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(head_adjustRO_new) & incomeSplit == -1]); summaryh(Income_posterior_minority_status_interaction_low_income.m)
+Income_posterior_minority_status_interaction_low_income.m <- lm(posterior_hpc ~ logIncome3 * minority_status+ AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(anterior_hpc) & incomeSplit == -1]); summaryh(Income_posterior_minority_status_interaction_low_income.m)
 ```
 
 ```{r FDR correction (vol ~ income) in separate subsamples }
@@ -350,10 +351,10 @@ corrected_ps <- rbind(corrected_ps, minority_inter_vols_income)
 HPC vols ~ income + minority status
 ```{r anterior hpc ~ income + minority status}
 #full sample
-Income_anterior_minority_status.m <- lm(head_adjustRO_new ~ logIncome3 + AgeC + GenderEC +  DeviceSerialNumber + minority_status, data = pingSubset[!is.na(tail_adjustRO_new)]); summary(Income_anterior_minority_status.m)
+Income_anterior_minority_status.m <- lm(anterior_hpc ~ logIncome3 + AgeC + GenderEC +  DeviceSerialNumber + minority_status, data = pingSubset[!is.na(posterior_hpc)]); summary(Income_anterior_minority_status.m)
 
 #lower income only
-Income_anterior_minority_status_low_income.m <- lm(head_adjustRO_new ~ logIncome3 + AgeC + GenderEC +  DeviceSerialNumber + minority_status, data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == -1]); summary(Income_anterior_minority_status_low_income.m)
+Income_anterior_minority_status_low_income.m <- lm(anterior_hpc ~ logIncome3 + AgeC + GenderEC +  DeviceSerialNumber + minority_status, data = pingSubset[!is.na(posterior_hpc) & incomeSplit == -1]); summary(Income_anterior_minority_status_low_income.m)
 ```
 
 ```{r FDR correction (vol ~ income) by minority status }
@@ -366,19 +367,19 @@ corrected_ps[, ps_adjusted := p.adjust(ps, method = 'fdr')]
  
 Test whether income has a larger influence on the volume of the anterior than posterior hippocampus
 ```{r interaction between region and income to predict subregion volumes}
-longpingSubset_analysis <- setDT(gather(pingSubset[!is.na(head_adjustRO_new) & !is.na(tail_adjustRO_new), 
-                                             .(ID, head_adjustRO_new, tail_adjustRO_new, logIncome3, AgeC, GenderEC, 
+longpingSubset_analysis <- setDT(gather(pingSubset[!is.na(anterior_hpc) & !is.na(posterior_hpc), 
+                                             .(ID, anterior_hpc, posterior_hpc, logIncome3, AgeC, GenderEC, 
                                                DeviceSerialNumber2)], region, volume, -c(ID, AgeC, logIncome3, GenderEC, 
                                               DeviceSerialNumber2)))
 
-longpingSubset_analysis[region == "tail_adjustRO_new", region2 := 1]
-longpingSubset_analysis[region == "head_adjustRO_new", region2 := 0]
+longpingSubset_analysis[region == "posterior_hpc", region2 := 1]
+longpingSubset_analysis[region == "anterior_hpc", region2 := 0]
 
 interaction.model = lmer(volume ~  region2  +(1|ID), data = longpingSubset_analysis); summaryh(interaction.model)
 interaction.model = lmer(volume ~  region2 + logIncome3 + AgeC + (1|ID), data = longpingSubset_analysis); summaryh(interaction.model)
 
-pingSubset[, mean(head_adjustRO_new, na.rm=T)]
-pingSubset[, mean(tail_adjustRO_new, na.rm=T)]
+pingSubset[, mean(anterior_hpc, na.rm=T)]
+pingSubset[, mean(posterior_hpc, na.rm=T)]
 
 #age interaction
 interaction.model = lmer(volume ~  logIncome3 * region  + AgeC + GenderEC +  DeviceSerialNumber2  +(1|ID), data = longpingSubset_analysis); summary(interaction.model)
@@ -386,19 +387,19 @@ interaction.model = lmer(volume ~  logIncome3 * region  + AgeC + GenderEC +  Dev
 
 ```{r make new long dataframe for creating figure of interaction between income and subregion volumes}
 #for visualizing the interaction, residualized out the effects of age, gender and device serial number 
-pingSubset[!is.na(head_adjustRO_new) & !is.na(tail_adjustRO_new), head_adjustRO_new_plotting := residuals(lm(head_adjustRO_new ~ GenderEC  + AgeC + DeviceSerialNumber))]
-pingSubset[!is.na(head_adjustRO_new) & !is.na(tail_adjustRO_new), tail_adjustRO_new_plotting := residuals(lm(tail_adjustRO_new ~ GenderEC  + AgeC + DeviceSerialNumber))]
+pingSubset[!is.na(anterior_hpc) & !is.na(posterior_hpc), anterior_hpc_plotting := residuals(lm(anterior_hpc ~ GenderEC  + AgeC + DeviceSerialNumber))]
+pingSubset[!is.na(anterior_hpc) & !is.na(posterior_hpc), posterior_hpc_plotting := residuals(lm(posterior_hpc ~ GenderEC  + AgeC + DeviceSerialNumber))]
 
 #z score values for anterior and posterior hippocampus so we can visualize how different these values are by income
-pingSubset[!is.na(tail_adjustRO_new_plotting), posteriorZ_plot := scale(tail_adjustRO_new_plotting)]
-pingSubset[!is.na(head_adjustRO_new_plotting), headZ_plot := scale(head_adjustRO_new_plotting)]
+pingSubset[!is.na(posterior_hpc_plotting), posteriorZ_plot := scale(posterior_hpc_plotting)]
+pingSubset[!is.na(anterior_hpc_plotting), headZ_plot := scale(anterior_hpc_plotting)]
 
 #convert to long form
 toGather <- pingSubset[!is.na(posteriorZ_plot) & !is.na(headZ_plot), .(ID, posteriorZ_plot, headZ_plot, logIncome3, AgeC, GenderEC, DeviceSerialNumber2)]
 longpingSubset <- gather(toGather, region, volume, -c(ID, AgeC, logIncome3, GenderEC, DeviceSerialNumber2))
 setDT(longpingSubset)
-longpingSubset[region == "tail_adjustRO_new", region2 := 1]
-longpingSubset[region == "head_adjustRO_new", region2 := -1]
+longpingSubset[region == "posterior_hpc", region2 := 1]
+longpingSubset[region == "anterior_hpc", region2 := -1]
 
 longpingSubset$region <- relevel(x = as.factor(longpingSubset$region), ref = "posteriorZ_plot")
 longpingSubset[region  == "posteriorZ_plot", region := "Posterior"]
@@ -437,57 +438,57 @@ ggsave(filename = "income_linear_antPost.png",width = 5, height = 3)
 #### Analyses to assess whether volumes predict episodic memory and language abilities ####
 ```{r memory ~ anterior HPC}
 #full sample
-memory_anterior.m = lm(TBX_ibam_scr ~ head_adjustRO_new + AgeC + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new)]); summary(memory_anterior.m)
+memory_anterior.m = lm(TBX_ibam_scr ~ anterior_hpc + AgeC + GenderEC, data = pingSubset[!is.na(posterior_hpc)]); summary(memory_anterior.m)
 
-memory_anterior.m = lm(TBX_ibam_scr ~ head_adjustRO_new + AgeC + Age2 + Age3 + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new)]); summaryh(memory_anterior.m)
+memory_anterior.m = lm(TBX_ibam_scr ~ anterior_hpc + AgeC + Age2 + Age3 + GenderEC, data = pingSubset[!is.na(posterior_hpc)]); summaryh(memory_anterior.m)
 
 #low income subsample
-memory_anterior_low_income.m = lm(TBX_ibam_scr ~ head_adjustRO_new + AgeC + GenderEC +logIncome3, data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == -1]); summaryh(memory_anterior_low_income.m)
+memory_anterior_low_income.m = lm(TBX_ibam_scr ~ anterior_hpc + AgeC + GenderEC +logIncome3, data = pingSubset[!is.na(posterior_hpc) & incomeSplit == -1]); summaryh(memory_anterior_low_income.m)
 
 #low income
-memory_anterior_low_income.m = lm(TBX_ibam_scr ~ head_adjustRO_new + AgeC + Age2 +GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == -1]); summaryh(memory_anterior_low_income.m)
+memory_anterior_low_income.m = lm(TBX_ibam_scr ~ anterior_hpc + AgeC + Age2 +GenderEC, data = pingSubset[!is.na(posterior_hpc) & incomeSplit == -1]); summaryh(memory_anterior_low_income.m)
 ```
 
 ```{r memory ~ posterior hpc}
 #full sample
-memory_posterior.m = lm(TBX_ibam_scr ~ tail_adjustRO_new  + AgeC + GenderEC , data = pingSubset[!is.na(head_adjustRO_new)]); summary(memory_posterior.m)
+memory_posterior.m = lm(TBX_ibam_scr ~ posterior_hpc  + AgeC + GenderEC , data = pingSubset[!is.na(anterior_hpc)]); summary(memory_posterior.m)
 
 #low income
-memory_posterior.m_lowIncome = lm(TBX_ibam_scr ~ tail_adjustRO_new  + AgeC + GenderEC + logIncome3, data = pingSubset[!is.na(head_adjustRO_new) & incomeSplit == -1]); summaryh(memory_posterior.m_lowIncome)
+memory_posterior.m_lowIncome = lm(TBX_ibam_scr ~ posterior_hpc  + AgeC + GenderEC + logIncome3, data = pingSubset[!is.na(anterior_hpc) & incomeSplit == -1]); summaryh(memory_posterior.m_lowIncome)
 
 #high income
-memory_posterior.m_highIncome = lm(TBX_ibam_scr ~ tail_adjustRO_new  + AgeC + GenderEC + logIncome3, data = pingSubset[!is.na(head_adjustRO_new) & incomeSplit == 1]); summary(memory_posterior.m_highIncome)
+memory_posterior.m_highIncome = lm(TBX_ibam_scr ~ posterior_hpc  + AgeC + GenderEC + logIncome3, data = pingSubset[!is.na(anterior_hpc) & incomeSplit == 1]); summary(memory_posterior.m_highIncome)
 ```
 
 ```{r vocab ~ anterior HPC}
 #full sample
-language_anterior.m = lm(TBX_VOCAB_THETA ~ head_adjustRO_new + AgeC + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new)]); summary(language_anterior.m)
+language_anterior.m = lm(TBX_VOCAB_THETA ~ anterior_hpc + AgeC + GenderEC, data = pingSubset[!is.na(posterior_hpc)]); summary(language_anterior.m)
 
-language_anterior.m = lm(TBX_VOCAB_THETA ~ head_adjustRO_new + AgeC + Age2 + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new)]); summaryh(language_anterior.m)
+language_anterior.m = lm(TBX_VOCAB_THETA ~ anterior_hpc + AgeC + Age2 + GenderEC, data = pingSubset[!is.na(posterior_hpc)]); summaryh(language_anterior.m)
 
 #low income
-language_anterior_low_income.m = lm(TBX_VOCAB_THETA ~ head_adjustRO_new + AgeC +  GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == -1]); summaryh(language_anterior_low_income.m)
+language_anterior_low_income.m = lm(TBX_VOCAB_THETA ~ anterior_hpc + AgeC +  GenderEC, data = pingSubset[!is.na(posterior_hpc) & incomeSplit == -1]); summaryh(language_anterior_low_income.m)
 
-language_anterior_low_income.m = lm(TBX_VOCAB_THETA ~ head_adjustRO_new + AgeC +  Age2 + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == -1]); summaryh(language_anterior_low_income.m)
+language_anterior_low_income.m = lm(TBX_VOCAB_THETA ~ anterior_hpc + AgeC +  Age2 + GenderEC, data = pingSubset[!is.na(posterior_hpc) & incomeSplit == -1]); summaryh(language_anterior_low_income.m)
 ```
 
 ```{r vocab ~ posterior HPC}
-language_posterior.m = lm(TBX_VOCAB_THETA ~ tail_adjustRO_new + AgeC + GenderEC, data = pingSubset[!is.na(head_adjustRO_new)]); summaryh(language_posterior.m)
+language_posterior.m = lm(TBX_VOCAB_THETA ~ posterior_hpc + AgeC + GenderEC, data = pingSubset[!is.na(anterior_hpc)]); summaryh(language_posterior.m)
 
 #low income
-language_posterior.m = lm(TBX_VOCAB_THETA ~ tail_adjustRO_new + AgeC + GenderEC + logIncome3, data = pingSubset[!is.na(head_adjustRO_new) & incomeSplit == -1]); summaryh(language_posterior.m)
+language_posterior.m = lm(TBX_VOCAB_THETA ~ posterior_hpc + AgeC + GenderEC + logIncome3, data = pingSubset[!is.na(anterior_hpc) & incomeSplit == -1]); summaryh(language_posterior.m)
 
 
 #high income
-language_posterior.m_high = lm(TBX_VOCAB_THETA ~ tail_adjustRO_new + AgeC + GenderEC + logIncome3, data = pingSubset[!is.na(head_adjustRO_new) & incomeSplit == 1]); summaryh(language_posterior.m_high)
+language_posterior.m_high = lm(TBX_VOCAB_THETA ~ posterior_hpc + AgeC + GenderEC + logIncome3, data = pingSubset[!is.na(anterior_hpc) & incomeSplit == 1]); summaryh(language_posterior.m_high)
 ```
 
 ```{r processing speed ~ anterior HPC}
-processing_speed_anterior.m = lm(TBX_pspac_scr ~ head_adjustRO_new  + AgeC + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new)]); summaryh(processing_speed_anterior.m)
+processing_speed_anterior.m = lm(TBX_pspac_scr ~ anterior_hpc  + AgeC + GenderEC, data = pingSubset[!is.na(posterior_hpc)]); summaryh(processing_speed_anterior.m)
 ```
 
 ```{r processing speed ~ posterior HPC}
-processing_speed_posterior.m = lm(TBX_pspac_scr ~ tail_adjustRO_new + AgeC + GenderEC, data = pingSubset[!is.na(head_adjustRO_new)]); summaryh(processing_speed_posterior.m)
+processing_speed_posterior.m = lm(TBX_pspac_scr ~ posterior_hpc + AgeC + GenderEC, data = pingSubset[!is.na(anterior_hpc)]); summaryh(processing_speed_posterior.m)
 ```
 
 ```{r FDR correction (vol ~ scores) in separate subsamples }
@@ -498,48 +499,50 @@ corrected_ps[, adjusted := p.adjust(ps, method = "fdr")]
 
 Testing whether age moderates cognitive score - hpc subregion relationships
 ```{r memory ~ anterior HPC * age}
-memory_anterior_age_interaction.m = lm(TBX_ibam_scr ~ AgeC * head_adjustRO_new + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new)]); summary(memory_anterior_age_interaction.m)
+memory_anterior_age_interaction.m = lm(TBX_ibam_scr ~ AgeC * anterior_hpc + GenderEC, data = pingSubset[!is.na(posterior_hpc)]); summary(memory_anterior_age_interaction.m)
 ```
 
 ```{r memory scores ~ posterior HPC * age}
-memory_posterior_age_interaction.m = lm(TBX_ibam_scr ~  AgeC * tail_adjustRO_new + GenderEC, data = pingSubset[!is.na(head_adjustRO_new)]); summaryh(memory_posterior_age_interaction.m)
+memory_posterior_age_interaction.m = lm(TBX_ibam_scr ~  AgeC * posterior_hpc + GenderEC, data = pingSubset[!is.na(anterior_hpc)]); summaryh(memory_posterior_age_interaction.m)
+pingSubset[, round_age := round(Age)]
+pingSubset[round_age > 3 & round_age < 8, age_categorical:= "3:7"]
+pingSubset[round_age > 7.99 & round_age < 12.99, age_categorical:= "8:12"]
+pingSubset[round_age > 12.999 & round_age < 17.99, age_categorical:= "13:17"]
+pingSubset[round_age > 17.99, age_categorical:= "18:21"]
 
-pingSubset$age_categorical <- relevel(as.factor(pingSubset$age_categorical), ref = "8:12")
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new), summaryh(lm(TBX_ibam_scr ~ tail_adjustRO_new  * age_categorical + AgeC + GenderEC))]
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new), summaryh(lm(TBX_ibam_scr ~ tail_adjustRO_new  * age_categorical + GenderEC))]
+pingSubset$age_categorical <- relevel(as.factor(pingSubset$age_categorical), ref = "13:17")
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc), summaryh(lm(TBX_ibam_scr ~ posterior_hpc  * Age_cat + GenderEC))]
 
-pingSubset$Age_cat
 #in discrete age bins
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & age_categorical %in% c("3:7"), summaryh(lm(TBX_ibam_scr ~ tail_adjustRO_new + AgeC + GenderEC))]
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & age_categorical == "8:12", summaryh(lm(TBX_ibam_scr ~ tail_adjustRO_new + AgeC + GenderEC))]
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & age_categorical == "13:17", summaryh(lm(TBX_ibam_scr ~ tail_adjustRO_new + AgeC+ GenderEC))]
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & age_categorical == "18:21", summaryh(lm(TBX_ibam_scr ~ tail_adjustRO_new + AgeC+ GenderEC))]
+pingSubset[!is.na(posterior_hpc)&!is.na(anterior_hpc) & age_categorical %in% c("3:7"), summaryh(lm(TBX_ibam_scr ~ posterior_hpc+ GenderEC))]
+pingSubset[!is.na(posterior_hpc)&!is.na(anterior_hpc) & age_categorical == "8:12", summaryh(lm(TBX_ibam_scr ~ posterior_hpc + GenderEC))]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & age_categorical == "13:17", summaryh(lm(TBX_ibam_scr ~ posterior_hpc+ GenderEC))]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & age_categorical == "18:21", summaryh(lm(TBX_ibam_scr ~ posterior_hpc + GenderEC))]
 ```
 
 ```{r vocab scores ~ anterior HPC * age}
-language_anterior_age_interaction.m = lm(TBX_VOCAB_THETA ~  AgeC * head_adjustRO_new + logIncome3 + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new)]); summaryh(language_anterior_age_interaction.m)
+language_anterior_age_interaction.m = lm(TBX_VOCAB_THETA ~  AgeC * anterior_hpc + logIncome3 + GenderEC, data = pingSubset[!is.na(posterior_hpc)]); summaryh(language_anterior_age_interaction.m)
 ```
 
 ```{r vocab ~ posterior HPC * age}
-language_posterior_age_interaction.m = lm(TBX_VOCAB_THETA ~  AgeC * tail_adjustRO_new + GenderEC, data = pingSubset[!is.na(head_adjustRO_new)]); summaryh(language_posterior_age_interaction.m)
+language_posterior_age_interaction.m = lm(TBX_VOCAB_THETA ~  AgeC * posterior_hpc + GenderEC, data = pingSubset[!is.na(anterior_hpc)]); summaryh(language_posterior_age_interaction.m)
 
 pingSubset$age_categorical <- relevel(as.factor(pingSubset$age_categorical), ref = "8:12")
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new), summaryh(lm(TBX_VOCAB_THETA ~ tail_adjustRO_new  * age_categorical + GenderEC + logIncome3))]
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new), summaryh(lm(TBX_VOCAB_THETA ~ tail_adjustRO_new  * age_categorical + AgeC + GenderEC + logIncome3))]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc), summaryh(lm(TBX_VOCAB_THETA ~ posterior_hpc  * Age_cat  + GenderEC))] #controlling for age
 
 #in discrete age bins
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & age_categorical %in% c("3:7"), summaryh(lm(TBX_VOCAB_THETA ~ tail_adjustRO_new + AgeC + GenderEC))]
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & age_categorical == "8:12", summaryh(lm(TBX_VOCAB_THETA ~ tail_adjustRO_new + AgeC + GenderEC))]
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & age_categorical == "13:17", summaryh(lm(TBX_VOCAB_THETA ~ tail_adjustRO_new + AgeC + GenderEC))]
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & age_categorical == "18:21", summaryh(lm(TBX_VOCAB_THETA ~ tail_adjustRO_new + AgeC + GenderEC))]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & age_categorical %in% c("3:7"), summaryh(lm(TBX_VOCAB_THETA ~ posterior_hpc + GenderEC))]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & age_categorical == "8:12", summaryh(lm(TBX_VOCAB_THETA ~ posterior_hpc + GenderEC))]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & age_categorical == "13:17", summaryh(lm(TBX_VOCAB_THETA ~ posterior_hpc+ GenderEC))]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & age_categorical == "18:21", summaryh(lm(TBX_VOCAB_THETA ~ posterior_hpc+ GenderEC))]
 ```
 
 ```{r prepare to plot the relationship between cognitive scores and hippocampal volumes}
 #create residualized cognitive scorse removing effects of age, gender and income
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & !is.na(TBX_ibam_scr), 
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & !is.na(TBX_ibam_scr), 
            memory_residuals := residuals(lm(TBX_ibam_scr ~ AgeC + GenderEC))]
 
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & !is.na(TBX_ibam_scr), 
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & !is.na(TBX_ibam_scr), 
           language_residuals := residuals(lm(TBX_VOCAB_THETA ~ AgeC + GenderEC))]
 
 #z-score these values
@@ -547,18 +550,18 @@ pingSubset[, memory_residualsZ := scale(memory_residuals)]
 pingSubset[, language_residualsZ := scale(language_residuals)]
 
 #gather to long form data
-toGather <- pingSubset[, .(ID, memory_residualsZ, language_residualsZ, tail_adjustRO_new, head_adjustRO_new, income3)]
-toPlot <- gather(toGather[!is.na(memory_residualsZ) & !is.na(language_residualsZ) & !is.na(head_adjustRO_new) & !is.na(tail_adjustRO_new)], region, volume, -c(ID, memory_residualsZ, language_residualsZ, income3))
+toGather <- pingSubset[, .(ID, memory_residualsZ, language_residualsZ, posterior_hpc, anterior_hpc, income3)]
+toPlot <- gather(toGather[!is.na(memory_residualsZ) & !is.na(language_residualsZ) & !is.na(anterior_hpc) & !is.na(posterior_hpc)], region, volume, -c(ID, memory_residualsZ, language_residualsZ, income3))
 
 setDT(toPlot)
-toPlot[region == "tail_adjustRO_new", region := "Posterior"]
-toPlot[region == "head_adjustRO_new", region := "Anterior"]
+toPlot[region == "posterior_hpc", region := "Posterior"]
+toPlot[region == "anterior_hpc", region := "Anterior"]
 toPlot[region == "Anterior" & income3 > 76000, summaryh(lm(language_residualsZ ~ volume))]
 
 #longpingSubset
 #setnames(longpingSubset,old = "volume", new = "volumeZ")
 #longpingSubset <- left_join(longpingSubset, toMerge[, c(1, 6,7)])
-#toGather <- pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new), .(ID, tail_adjustRO_new, head_adjustRO_new, logIncome3, AgeC, GenderEC, DeviceSerialNumber2)]
+#toGather <- pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc), .(ID, posterior_hpc, anterior_hpc, logIncome3, AgeC, GenderEC, DeviceSerialNumber2)]
 #setDT(longpingSubset)
 #left_join(longpingSubset, toMerge[, c(1,)])
 #longpingSubset$region = relevel(longpingSubset$region, ref = "Posterior")
@@ -572,19 +575,19 @@ corrected_ps[, adjusted := p.adjust(ps, method = "fdr")]
 
 Testing whether income subsample moderates the relationship between cognitive scores and subregion volumes
 ```{r memory scores ~ anterior HPC * income subsample}
-memory_anterior_interaction.m = lm(TBX_ibam_scr ~ head_adjustRO_new * incomeSplit + AgeC + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new)]); summary(memory_anterior_interaction.m)
+memory_anterior_interaction.m = lm(TBX_ibam_scr ~ anterior_hpc * incomeSplit + AgeC + GenderEC, data = pingSubset[!is.na(posterior_hpc)]); summary(memory_anterior_interaction.m)
 ```
 
 ```{r vocab scores ~ anterior HPC * income subsample}
-vocab_anterior_interaction.m = lm(TBX_VOCAB_THETA ~ head_adjustRO_new * incomeSplit + AgeC + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new)]);summary(vocab_anterior_interaction.m)
+vocab_anterior_interaction.m = lm(TBX_VOCAB_THETA ~ anterior_hpc * incomeSplit + AgeC + GenderEC, data = pingSubset[!is.na(posterior_hpc)]);summary(vocab_anterior_interaction.m)
 ```
 
 ```{r memory scores ~ posterior HPC * income subsample}
-memory_posterior_interaction.m = lm(TBX_ibam_scr ~ tail_adjustRO_new * incomeSplit + AgeC + GenderEC, data = pingSubset[!is.na(head_adjustRO_new)]); summary(memory_posterior_interaction.m)
+memory_posterior_interaction.m = lm(TBX_ibam_scr ~ posterior_hpc * incomeSplit + AgeC + GenderEC, data = pingSubset[!is.na(anterior_hpc)]); summary(memory_posterior_interaction.m)
 ```
 
 ```{r vocab scores ~ posterior HPC * income subsample}
-vocab_posterior_interaction.m = lm(TBX_VOCAB_THETA ~ tail_adjustRO_new * incomeSplit + AgeC + GenderEC, data = pingSubset[!is.na(head_adjustRO_new)]); summaryh(vocab_posterior_interaction.m)
+vocab_posterior_interaction.m = lm(TBX_VOCAB_THETA ~ posterior_hpc * incomeSplit + AgeC + GenderEC, data = pingSubset[!is.na(anterior_hpc)]); summaryh(vocab_posterior_interaction.m)
 ```
 
 ```{r FDR correction (vol ~ scores * income subsample) }
@@ -598,36 +601,36 @@ corrected_ps <- rbind(age_inter_vols_scores, group_inter_scores_vols)
 Cognitive scores ~ subregion volumes separately for lower and higher income subsamples
 Anterior HPC
 ```{r memory scores ~ anterior HPC in lower income subsample}
-memory_anterior_lower_income.m = lm(TBX_ibam_scr ~ head_adjustRO_new  + AgeC  + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == -1]); summaryh(memory_anterior_lower_income.m)
+memory_anterior_lower_income.m = lm(TBX_ibam_scr ~ anterior_hpc  + AgeC  + GenderEC, data = pingSubset[!is.na(posterior_hpc) & incomeSplit == -1]); summaryh(memory_anterior_lower_income.m)
 ```
 
 ```{r memory scores ~ anterior HPC in higher income subsample}
-memory_anterior_higher_income.m = lm(TBX_ibam_scr ~ head_adjustRO_new  + AgeC + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == 1]); summaryh(memory_anterior_higher_income.m)
+memory_anterior_higher_income.m = lm(TBX_ibam_scr ~ anterior_hpc  + AgeC + GenderEC, data = pingSubset[!is.na(posterior_hpc) & incomeSplit == 1]); summaryh(memory_anterior_higher_income.m)
 ```
 
 ```{r vocab ~ anterior HPC in lower income subsample}
-language_anterior_lower_income.m = lm(TBX_VOCAB_THETA ~ head_adjustRO_new + AgeC + GenderEC , data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == -1]); summary(language_anterior_lower_income.m)
+language_anterior_lower_income.m = lm(TBX_VOCAB_THETA ~ anterior_hpc + AgeC + GenderEC , data = pingSubset[!is.na(posterior_hpc) & incomeSplit == -1]); summary(language_anterior_lower_income.m)
 ```
 
 ```{r vocab ~ anterior HPC in higher income subsample}
-language_anterior_higher_income.m = lm(TBX_VOCAB_THETA ~ head_adjustRO_new + AgeC + GenderEC , data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == 1]); summaryh(language_anterior_higher_income.m)
+language_anterior_higher_income.m = lm(TBX_VOCAB_THETA ~ anterior_hpc + AgeC + GenderEC , data = pingSubset[!is.na(posterior_hpc) & incomeSplit == 1]); summaryh(language_anterior_higher_income.m)
 ```
 
 Posterior HPC
 ```{r memory scores ~ posterior HPC in lower income subsample}
-memory_posterior_lower_income.m = lm(TBX_ibam_scr ~ tail_adjustRO_new  + AgeC + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == -1]); summary(memory_posterior_lower_income.m)
+memory_posterior_lower_income.m = lm(TBX_ibam_scr ~ posterior_hpc  + AgeC + GenderEC, data = pingSubset[!is.na(posterior_hpc) & incomeSplit == -1]); summary(memory_posterior_lower_income.m)
 ```
 
 ```{r memory scores ~ posterior HPC in higher income subsample}
-memory_posterior_higher_income.m = lm(TBX_ibam_scr ~ tail_adjustRO_new  + AgeC + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == 1]); summary(memory_posterior_higher_income.m)
+memory_posterior_higher_income.m = lm(TBX_ibam_scr ~ posterior_hpc  + AgeC + GenderEC, data = pingSubset[!is.na(posterior_hpc) & incomeSplit == 1]); summary(memory_posterior_higher_income.m)
 ```
 
 ```{r vocab ~ posterior HPC in lower income subsample}
-language_posterior_lower_income.m = lm(TBX_VOCAB_THETA ~ tail_adjustRO_new + AgeC + GenderEC , data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == -1]); summary(language_posterior_lower_income.m)
+language_posterior_lower_income.m = lm(TBX_VOCAB_THETA ~ posterior_hpc + AgeC + GenderEC , data = pingSubset[!is.na(posterior_hpc) & incomeSplit == -1]); summary(language_posterior_lower_income.m)
 ```
 
 ```{r vocab ~ posterior HPC in higher income subsample}
-language_posterior_higher_income.m = lm(TBX_VOCAB_THETA ~ tail_adjustRO_new + AgeC + GenderEC , data = pingSubset[!is.na(tail_adjustRO_new) & incomeSplit == 1]); summary(language_posterior_higher_income.m)
+language_posterior_higher_income.m = lm(TBX_VOCAB_THETA ~ posterior_hpc + AgeC + GenderEC , data = pingSubset[!is.na(posterior_hpc) & incomeSplit == 1]); summary(language_posterior_higher_income.m)
 ```
 
 ```{r FDR correction (vol ~ scores) in separate subsamples }
@@ -705,55 +708,55 @@ ggsave(filename = "language_ant_post_high.png", width = 5.5, height = 3)
 ####Analyses to assess whether anterior volumes mediate the relationship between income and memory ####
 Analysis to test whether anterior volumes mediate the relationship between income and memory scores
 ```{r z score values so we can report standardized coefficients}
-pingSubset[!is.na(head_adjustRO_new) & !is.na(tail_adjustRO_new) & !is.na(TBX_ibam_scr), TBX_ibam_scrZ := scale(TBX_ibam_scr)]
-pingSubset[!is.na(head_adjustRO_new)& !is.na(tail_adjustRO_new) & !is.na(TBX_VOCAB_THETA), TBX_VOCAB_THETAZ := scale(TBX_VOCAB_THETA)]
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)& !is.na(TBX_ibam_scr), anterior_adjustZ := scale(head_adjustRO_new)]
-pingSubset[!is.na(head_adjustRO_new) & !is.na(tail_adjustRO_new)& !is.na(TBX_ibam_scr), posterior_adjustZ := scale(tail_adjustRO_new)]
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)& !is.na(TBX_ibam_scr), whole_adjustZ := scale(whole_adjust)]
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)& !is.na(TBX_ibam_scr), AgeZ := scale(AgeC)]
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)& !is.na(TBX_ibam_scr), Age2Z := scale(Age2)]
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)& !is.na(TBX_ibam_scr), Age3Z := scale(Age3)]
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)& !is.na(TBX_ibam_scr), logIncome3Z := scale(logIncome3)]
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)& !is.na(TBX_ibam_scr), scanner := DeviceSerialNumber2]
+pingSubset[!is.na(anterior_hpc) & !is.na(posterior_hpc) & !is.na(TBX_ibam_scr), TBX_ibam_scrZ := scale(TBX_ibam_scr)]
+pingSubset[!is.na(anterior_hpc)& !is.na(posterior_hpc) & !is.na(TBX_VOCAB_THETA), TBX_VOCAB_THETAZ := scale(TBX_VOCAB_THETA)]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)& !is.na(TBX_ibam_scr), anterior_adjustZ := scale(anterior_hpc)]
+pingSubset[!is.na(anterior_hpc) & !is.na(posterior_hpc)& !is.na(TBX_ibam_scr), posterior_adjustZ := scale(posterior_hpc)]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)& !is.na(TBX_ibam_scr), whole_adjustZ := scale(whole_adjust)]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)& !is.na(TBX_ibam_scr), AgeZ := scale(AgeC)]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)& !is.na(TBX_ibam_scr), Age2Z := scale(Age2)]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)& !is.na(TBX_ibam_scr), Age3Z := scale(Age3)]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)& !is.na(TBX_ibam_scr), logIncome3Z := scale(logIncome3)]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)& !is.na(TBX_ibam_scr), scanner := DeviceSerialNumber2]
 ```
 
 Episodic memory scores - Ahipp volumes  --- Full sample (z-scored mediation) ** only linear effects of age included
 ```{r mediation analysis for income- episodic memory score relationship in full sample}
 source( "http://page-gould.com/scripts/r/mediations_patch.r" ) # Needed to update the mediations function
-anterior_memory.y <- lm(TBX_ibam_scrZ ~ anterior_adjustZ + GenderEC + AgeZ + logIncome3Z + scanner, data = pingSubset[!is.na(tail_adjustRO_new)]); summaryh(anterior_memory.y)
-anterior_memory.m <- lm(anterior_adjustZ ~logIncome3Z + AgeZ + scanner + GenderEC, data = pingSubset[!is.na(TBX_ibam_scrZ) & !is.na(tail_adjustRO_new)]); summary(anterior_memory.m) #NOTE: is.na(TBX_ibam_scr) is to ensure that only individuals with memory scores are included in mediation model
+anterior_memory.y <- lm(TBX_ibam_scrZ ~ anterior_adjustZ + GenderEC + AgeZ + logIncome3Z + scanner, data = pingSubset[!is.na(posterior_hpc)]); summaryh(anterior_memory.y)
+anterior_memory.m <- lm(anterior_adjustZ ~logIncome3Z + AgeZ + scanner + GenderEC, data = pingSubset[!is.na(TBX_ibam_scrZ) & !is.na(posterior_hpc)]); summary(anterior_memory.m) #NOTE: is.na(TBX_ibam_scr) is to ensure that only individuals with memory scores are included in mediation model
 model.mediate_anterior_memory <- mediate(model.m = anterior_memory.m, model.y = anterior_memory.y, sims = 5000, treat = "logIncome3Z", mediator = "anterior_adjustZ",boot = TRUE)
 summary(model.mediate_anterior_memory); standard.errors(model.mediate_anterior_memory)
 ```
 
 Episodic memory scores - Ahipp volumes  --- Full sample (z-scored mediation) *** nonlinear effects of age included
 ```{r mediation analysis for income- episodic memory score relationship in full sample}
-anterior_memory.y_nonlinear <- lm(TBX_ibam_scrZ ~ anterior_adjustZ + GenderEC + AgeZ + Age2Z + Age3Z + logIncome3Z + scanner, data = pingSubset[!is.na(tail_adjustRO_new)]); summaryh(anterior_memory.y)
-anterior_memory.m_nonlinear <- lm(anterior_adjustZ ~logIncome3Z + AgeZ + scanner + GenderEC, data = pingSubset[!is.na(TBX_ibam_scrZ) & !is.na(tail_adjustRO_new)]); summary(anterior_memory.m) #NOTE: is.na(TBX_ibam_scr) is to ensure that only individuals with memory scores are included in mediation model
+anterior_memory.y_nonlinear <- lm(TBX_ibam_scrZ ~ anterior_adjustZ + GenderEC + AgeZ + Age2Z + Age3Z + logIncome3Z + scanner, data = pingSubset[!is.na(posterior_hpc)]); summaryh(anterior_memory.y)
+anterior_memory.m_nonlinear <- lm(anterior_adjustZ ~logIncome3Z + AgeZ + scanner + GenderEC, data = pingSubset[!is.na(TBX_ibam_scrZ) & !is.na(posterior_hpc)]); summary(anterior_memory.m) #NOTE: is.na(TBX_ibam_scr) is to ensure that only individuals with memory scores are included in mediation model
 model.mediate_anterior_memory_nonlinear <- mediate(model.m = anterior_memory.m_nonlinear, model.y = anterior_memory.y_nonlinear, sims = 5000, treat = "logIncome3Z", mediator = "anterior_adjustZ",boot = TRUE)
 summary(model.mediate_anterior_memory_nonlinear); standard.errors(model.mediate_anterior_memory_nonlinear)
 ```
 
 Episodic memory scores -  Ahipp volumes --- lower income subsample (z-scored mediation) ** linear effects of age included only
 ```{r mediation analysis for income- episodic memory score relationship in lower income subsample}
-anterior_memory.y <- lm(TBX_ibam_scrZ ~ anterior_adjustZ + GenderEC + AgeZ  + logIncome3Z + scanner, data = pingSubset[!is.na(tail_adjustRO_new) & income3 < 76000]); summaryh(anterior_memory.y)
-anterior_memory.m <- lm(anterior_adjustZ ~logIncome3Z + AgeZ + scanner + GenderEC, data = pingSubset[!is.na(TBX_ibam_scrZ) & !is.na(tail_adjustRO_new) & income3 < 76000]); summary(anterior_memory.m) #NOTE: is.na(TBX_ibam_scr) is to ensure that only individuals with memory scores are included in mediation model
+anterior_memory.y <- lm(TBX_ibam_scrZ ~ anterior_adjustZ + GenderEC + AgeZ  + logIncome3Z + scanner, data = pingSubset[!is.na(posterior_hpc) & income3 < 76000]); summaryh(anterior_memory.y)
+anterior_memory.m <- lm(anterior_adjustZ ~logIncome3Z + AgeZ + scanner + GenderEC, data = pingSubset[!is.na(TBX_ibam_scrZ) & !is.na(posterior_hpc) & income3 < 76000]); summary(anterior_memory.m) #NOTE: is.na(TBX_ibam_scr) is to ensure that only individuals with memory scores are included in mediation model
 model.mediate_anterior_memory_low_income <- mediate(model.m = anterior_memory.m, model.y = anterior_memory.y, sims = 5000, treat = "logIncome3Z", mediator = "anterior_adjustZ",boot = TRUE, covariates = c("GenderEC", "AgeC", "scanner"))
 summary(model.mediate_anterior_memory_low_income); standard.errors(model.mediate_anterior_memory_low_income)
 ```
 
 Episodic memory scores -  Ahipp volumes --- lower income subsample (z-scored mediation) *** nonlinear effects of age included 
 ```{r mediation analysis for income- episodic memory score relationship in lower income subsample}
-anterior_memory.y_nonlinear <- lm(TBX_ibam_scrZ ~ anterior_adjustZ + GenderEC + AgeZ  + Age2Z + logIncome3Z + scanner, data = pingSubset[!is.na(tail_adjustRO_new) & income3 < 76000]); summaryh(anterior_memory.y_nonlinear)
-anterior_memory.m_nonlinear <- lm(anterior_adjustZ ~logIncome3Z + AgeZ + scanner + GenderEC, data = pingSubset[!is.na(TBX_ibam_scrZ) & !is.na(tail_adjustRO_new) & income3 < 76000]); summary(anterior_memory.m_nonlinear) 
+anterior_memory.y_nonlinear <- lm(TBX_ibam_scrZ ~ anterior_adjustZ + GenderEC + AgeZ  + Age2Z + logIncome3Z + scanner, data = pingSubset[!is.na(posterior_hpc) & income3 < 76000]); summaryh(anterior_memory.y_nonlinear)
+anterior_memory.m_nonlinear <- lm(anterior_adjustZ ~logIncome3Z + AgeZ + scanner + GenderEC, data = pingSubset[!is.na(TBX_ibam_scrZ) & !is.na(posterior_hpc) & income3 < 76000]); summary(anterior_memory.m_nonlinear) 
 model.mediate_anterior_memory_low_income_nonlinear <- mediate(model.m = anterior_memory.m_nonlinear, model.y = anterior_memory.y_nonlinear, sims = 5000, treat = "logIncome3Z", mediator = "anterior_adjustZ",boot = TRUE, covariates = c("GenderEC", "AgeZ", "Age2Z", "scanner"))
 summary(model.mediate_anterior_memory_low_income_nonlinear); standard.errors(model.mediate_anterior_memory_low_income_nonlinear)
 ```
 
 Episodic memory scores - Ahipp volumes --- higher income subsample ** linear effect of age only
 ```{r mediation analysis for income- episodic memory score relationship in higher income subsample}
-anterior_memory.y <- lm(TBX_ibam_scrZ ~ anterior_adjustZ + GenderEC + AgeZ + logIncome3Z + scanner, data = pingSubset[!is.na(tail_adjustRO_new) & income3 > 76000]); summaryh(anterior_memory.y)
-anterior_memory.m <- lm(anterior_adjustZ ~logIncome3Z + AgeZ + scanner + GenderEC, data = pingSubset[!is.na(TBX_ibam_scrZ) & !is.na(tail_adjustRO_new) & income3 > 76000]); summary(anterior_memory.m) #NOTE: is.na(TBX_ibam_scr) is to ensure that only individuals with memory scores are included in mediation model
+anterior_memory.y <- lm(TBX_ibam_scrZ ~ anterior_adjustZ + GenderEC + AgeZ + logIncome3Z + scanner, data = pingSubset[!is.na(posterior_hpc) & income3 > 76000]); summaryh(anterior_memory.y)
+anterior_memory.m <- lm(anterior_adjustZ ~logIncome3Z + AgeZ + scanner + GenderEC, data = pingSubset[!is.na(TBX_ibam_scrZ) & !is.na(posterior_hpc) & income3 > 76000]); summary(anterior_memory.m) #NOTE: is.na(TBX_ibam_scr) is to ensure that only individuals with memory scores are included in mediation model
 model.mediate_anterior_memory_high_income <- mediate(model.m = anterior_memory.m, model.y = anterior_memory.y, sims = 5000, treat = "logIncome3Z", mediator = "anterior_adjustZ",boot = TRUE, covariates = c("GenderEC", "AgeZ", "scanner"))
 summary(model.mediate_anterior_memory_high_income); standard.errors(model.mediate_anterior_memory_high_income)
 ```
@@ -834,20 +837,20 @@ summary(model.mediate_whole_language); standard.errors(model.mediate_whole_langu
 #analyses using education rather than income
 Cognition - education models
 ```{r memory ~ education models}
-Education_memory.m <- lm(TBX_ibam_scr ~ educationAvg_recode +AgeC + GenderEC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)]); summaryh(Education_memory.m)
+Education_memory.m <- lm(TBX_ibam_scr ~ educationAvg_recode +AgeC + GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summaryh(Education_memory.m)
 ```
 
 ```{r vocabulary ~ education models}
-Education_language.m <- lm(TBX_VOCAB_THETA ~ educationAvg_recode + GenderEC + AgeC, data = pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new)]); summaryh(Education_language.m)
+Education_language.m <- lm(TBX_VOCAB_THETA ~ educationAvg_recode + GenderEC + AgeC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summaryh(Education_language.m)
 ```
 
 subregion - education models
 ```{r anterior vols ~ income}
-Education_anterior.m <- lm(head_adjustRO_new ~ educationAvg_recode + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(tail_adjustRO_new)]); summaryh(Education_anterior.m)
+Education_anterior.m <- lm(anterior_hpc ~ educationAvg_recode + AgeC + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(posterior_hpc)]); summaryh(Education_anterior.m)
 ```
 
 ```{r posterior vols ~ income}
-Education_posterior.m <- lm(tail_adjustRO_new ~ educationAvg_recode + AgeC  + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(head_adjustRO_new)]); summaryh(Education_posterior.m)
+Education_posterior.m <- lm(posterior_hpc ~ educationAvg_recode + AgeC  + GenderEC +  DeviceSerialNumber, data = pingSubset[!is.na(anterior_hpc)]); summaryh(Education_posterior.m)
 ```
 
 Mediation analysis
@@ -855,14 +858,14 @@ Does anterior hippocampaus mediate education-related gaps in cognition?
 
 Analysis to test whether anterior volumes mediate the relationship between income and memory scores
 ```{r z score values so we can report standardized coefficients}
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & !is.na(TBX_ibam_scr), educationAvg_recodeZ := scale(educationAvg_recode)]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & !is.na(TBX_ibam_scr), educationAvg_recodeZ := scale(educationAvg_recode)]
 ```
 
 Episodic memory scores - Ahipp volumes  --- Full sample (z-scored mediation) ** only linear effects of age included
 ```{r mediation analysis for income- episodic memory score relationship in full sample}
 source( "http://page-gould.com/scripts/r/mediations_patch.r" ) # Needed to update the mediations function
-anterior_memory.y <- lm(TBX_ibam_scrZ ~ anterior_adjustZ + GenderEC + AgeZ + educationAvg_recodeZ + scanner, data = pingSubset[!is.na(tail_adjustRO_new)]); summary(anterior_memory.y)
-anterior_memory.m <- lm(anterior_adjustZ ~educationAvg_recodeZ + AgeZ + scanner + GenderEC, data = pingSubset[!is.na(TBX_ibam_scrZ) & !is.na(tail_adjustRO_new)]); summary(anterior_memory.m) #NOTE: is.na(TBX_ibam_scr) is to ensure that only individuals with memory scores are included in mediation model
+anterior_memory.y <- lm(TBX_ibam_scrZ ~ anterior_adjustZ + GenderEC + AgeZ + educationAvg_recodeZ + scanner, data = pingSubset[!is.na(posterior_hpc)]); summary(anterior_memory.y)
+anterior_memory.m <- lm(anterior_adjustZ ~educationAvg_recodeZ + AgeZ + scanner + GenderEC, data = pingSubset[!is.na(TBX_ibam_scrZ) & !is.na(posterior_hpc)]); summary(anterior_memory.m) #NOTE: is.na(TBX_ibam_scr) is to ensure that only individuals with memory scores are included in mediation model
 model.mediate_anterior_memory <- mediate(model.m = anterior_memory.m, model.y = anterior_memory.y, sims = 5000, treat = "educationAvg_recodeZ", mediator = "anterior_adjustZ",boot = TRUE)
 summary(model.mediate_anterior_memory); standard.errors(model.mediate_anterior_memory)
 ```
@@ -891,9 +894,9 @@ ggtheme <- theme(plot.caption = element_text(hjust = -.2),
 ```
 
 ```{r Figure 1c, d}
-pingSubset[!is.na(head_adjustRO_new) & !is.na(tail_adjustRO_new) & !is.na(TBX_ibam_scr), 
+pingSubset[!is.na(anterior_hpc) & !is.na(posterior_hpc) & !is.na(TBX_ibam_scr), 
            memory_residualsZ := scale(residuals(lm(TBX_ibam_scr ~ AgeC + GenderEC)))]
-pingSubset[!is.na(head_adjustRO_new) & !is.na(tail_adjustRO_new) & !is.na(TBX_VOCAB_THETA), 
+pingSubset[!is.na(anterior_hpc) & !is.na(posterior_hpc) & !is.na(TBX_VOCAB_THETA), 
            vocab_residualsZ := scale(residuals(lm(TBX_VOCAB_THETA ~ AgeC + GenderEC)))]
 
 
@@ -947,8 +950,8 @@ ggsave("income_vocab_linear.png", width = 5.5, height = 3)
 ```{r Figure 2b, c}
 posteriorCol = "dodgerblue"
 anteriorvolscolor ="violetred"
-pingSubset[!is.na(head_adjustRO_new) & !is.na(tail_adjustRO_new), tail_adjustRO_new_residualsZ := scale(residuals(lm(tail_adjustRO_new ~ AgeC + GenderEC)))]
-pingSubset[!is.na(head_adjustRO_new) & !is.na(tail_adjustRO_new), head_adjustRO_new_residualsZ := scale(residuals(lm(head_adjustRO_new ~ AgeC + GenderEC)))]
+pingSubset[!is.na(anterior_hpc) & !is.na(posterior_hpc), posterior_hpc_residualsZ := scale(residuals(lm(posterior_hpc ~ AgeC + GenderEC)))]
+pingSubset[!is.na(anterior_hpc) & !is.na(posterior_hpc), anterior_hpc_residualsZ := scale(residuals(lm(anterior_hpc ~ AgeC + GenderEC)))]
 longpingSubset_analysis[, volumeZ := scale(residuals(lm(volume ~ AgeC + GenderEC))), by = region2]
 longpingSubset_analysis <- left_join(longpingSubset_analysis, pingSubset[, .(ID, income3)])
 
@@ -976,8 +979,8 @@ longpingSubset_analysis <- left_join(longpingSubset_analysis, pingSubset[, .(ID,
 
 #figure 3a
 ggplot(longpingSubset_analysis, aes(volume, memory_residualsZ, col = region)) +
-   geom_smooth(formula = y ~ x, method = 'lm', col = posteriorCol, data = longpingSubset_analysis[region == "tail_adjustRO_new"]) +
-  geom_smooth(formula = y ~ x, method = 'lm', col = anteriorvolscolor, data = longpingSubset_analysis[region == "head_adjustRO_new"]) +
+   geom_smooth(formula = y ~ x, method = 'lm', col = posteriorCol, data = longpingSubset_analysis[region == "posterior_hpc"]) +
+  geom_smooth(formula = y ~ x, method = 'lm', col = anteriorvolscolor, data = longpingSubset_analysis[region == "anterior_hpc"]) +
    labs(y = "Memory (z scores)", x = " ", col = " ")+
      #theme(plot.caption = element_text(hjust = -.2, size  = 12)) +
 ggtheme2
@@ -985,8 +988,8 @@ ggtheme2
 
 #figure 3b
 ggplot(longpingSubset_analysis, aes(volume,vocab_residualsZ, col = region)) +
-   geom_smooth(formula = y ~ x, method = 'lm', col = posteriorCol, data = longpingSubset_analysis[region == "tail_adjustRO_new"]) +
-  geom_smooth(formula = y ~ x, method = 'lm', col = anteriorvolscolor, data = longpingSubset_analysis[region == "head_adjustRO_new"]) +
+   geom_smooth(formula = y ~ x, method = 'lm', col = posteriorCol, data = longpingSubset_analysis[region == "posterior_hpc"]) +
+  geom_smooth(formula = y ~ x, method = 'lm', col = anteriorvolscolor, data = longpingSubset_analysis[region == "anterior_hpc"]) +
    labs(y = "Vocabulary (z scores)", x = " ", col = " ")+
      #theme(plot.caption = element_text(hjust = -.2, size  = 12)) +
 ggtheme2
@@ -994,8 +997,8 @@ ggtheme2
 
 #figure 3c
 ggplot(longpingSubset_analysis, aes(volume, memory_residualsZ, col = region)) +
-   geom_smooth(formula = y ~ x, method = 'lm', col = posteriorCol, data = longpingSubset_analysis[region == "tail_adjustRO_new"]) +
-  geom_smooth(formula = y ~ x, method = 'lm', col = anteriorvolscolor, data = longpingSubset_analysis[region == "head_adjustRO_new"]) +
+   geom_smooth(formula = y ~ x, method = 'lm', col = posteriorCol, data = longpingSubset_analysis[region == "posterior_hpc"]) +
+  geom_smooth(formula = y ~ x, method = 'lm', col = anteriorvolscolor, data = longpingSubset_analysis[region == "anterior_hpc"]) +
    labs(y = "Memory (z scores)", x = " ", col = " ")+
      #theme(plot.caption = element_text(hjust = -.2, size  = 12)) +
 ggtheme2
@@ -1003,8 +1006,8 @@ ggtheme2
 
 #figure 3d
 ggplot(longpingSubset_analysis[income3 < 76000], aes(volume,vocab_residualsZ, col = region)) +
-   geom_smooth(formula = y ~ x, method = 'lm', col = posteriorCol, data = longpingSubset_analysis[region == "tail_adjustRO_new" & income3 < 76000]) +
-  geom_smooth(formula = y ~ x, method = 'lm', col = anteriorvolscolor, data = longpingSubset_analysis[region == "head_adjustRO_new"& income3 < 76000]) +
+   geom_smooth(formula = y ~ x, method = 'lm', col = posteriorCol, data = longpingSubset_analysis[region == "posterior_hpc" & income3 < 76000]) +
+  geom_smooth(formula = y ~ x, method = 'lm', col = anteriorvolscolor, data = longpingSubset_analysis[region == "anterior_hpc"& income3 < 76000]) +
    labs(y = "Vocabulary (z scores)", x = " ", col = " ")+
      #theme(plot.caption = element_text(hjust = -.2, size  = 12)) +
 ggtheme2
@@ -1012,16 +1015,16 @@ ggtheme2
 
 #figure 3e
 ggplot(longpingSubset_analysis[income3 > 76000], aes(volume, memory_residualsZ, col = region)) +
-   geom_smooth(formula = y ~ x, method = 'lm', col = posteriorCol, data = longpingSubset_analysis[region == "tail_adjustRO_new" & income3 > 76000]) +
-  geom_smooth(formula = y ~ x, method = 'lm', col = anteriorvolscolor, data = longpingSubset_analysis[region == "head_adjustRO_new"& income3 > 76000]) +
+   geom_smooth(formula = y ~ x, method = 'lm', col = posteriorCol, data = longpingSubset_analysis[region == "posterior_hpc" & income3 > 76000]) +
+  geom_smooth(formula = y ~ x, method = 'lm', col = anteriorvolscolor, data = longpingSubset_analysis[region == "anterior_hpc"& income3 > 76000]) +
    labs(y = "Memory (z scores)", x = " ", col = " ")+
      #theme(plot.caption = element_text(hjust = -.2, size  = 12)) +
 ggtheme2
 
 #figure 3f
 ggplot(longpingSubset_analysis[income3 > 76000], aes(volume,vocab_residualsZ, col = region)) +
-   geom_smooth(formula = y ~ x, method = 'lm', col = posteriorCol, data = longpingSubset_analysis[region == "tail_adjustRO_new" & income3 > 76000]) +
-  geom_smooth(formula = y ~ x, method = 'lm', col = anteriorvolscolor, data = longpingSubset_analysis[region == "head_adjustRO_new"& income3 > 76000]) +
+   geom_smooth(formula = y ~ x, method = 'lm', col = posteriorCol, data = longpingSubset_analysis[region == "posterior_hpc" & income3 > 76000]) +
+  geom_smooth(formula = y ~ x, method = 'lm', col = anteriorvolscolor, data = longpingSubset_analysis[region == "anterior_hpc"& income3 > 76000]) +
    labs(y = "Vocabulary (z scores)", x = " ", col = " ")+
      #theme(plot.caption = element_text(hjust = -.2, size  = 12)) +
 ggtheme2
@@ -1045,25 +1048,25 @@ ggplot(pingSubset, aes(Age, TBX_VOCAB_THETA)) +
 
 ```{r Suppl 6}
 
-pingSubset[!is.na(head_adjustRO_new) & !is.na(tail_adjustRO_new), tail_adjustRO_newZ := scale(tail_adjustRO_new)]
-pingSubset[!is.na(head_adjustRO_new) & !is.na(tail_adjustRO_new), head_adjustRO_newZ := scale(head_adjustRO_new)]
+pingSubset[!is.na(anterior_hpc) & !is.na(posterior_hpc), posterior_hpcZ := scale(posterior_hpc)]
+pingSubset[!is.na(anterior_hpc) & !is.na(posterior_hpc), anterior_hpcZ := scale(anterior_hpc)]
 
 #age and anterior
-ggplot(pingSubset, aes(Age, head_adjustRO_newZ)) +
+ggplot(pingSubset, aes(Age, anterior_hpcZ)) +
   geom_jitter(color = anteriorvolscolor) +
 stat_smooth(formula = y ~ x, method = "lm", color = "black") +
   ggtheme
 
 
 #age and poserior
-ggplot(pingSubset, aes(Age, tail_adjustRO_newZ)) +
+ggplot(pingSubset, aes(Age, posterior_hpcZ)) +
   geom_jitter(color = "dodgerblue") +
 stat_smooth(formula = y ~ x, method = "lm", color = "black") +
   ggtheme
 ```
 
 ```{r Suppl Figure 7a}
-pingSubset[!is.na(head_adjustRO_new) & !is.na(tail_adjustRO_new), ]%>%
+pingSubset[!is.na(anterior_hpc) & !is.na(posterior_hpc), ]%>%
   ggplot(aes(logIncome3, scale(TBX_ibam_scr), col = age_categorical )) +
   stat_smooth(method  = "lm", formula = y~ x) +
 ggtheme +
@@ -1076,7 +1079,7 @@ ggsave(filename = "age_inter_income_memory.png", width = 6, height = 3.2)
 ```
 
 ```{r Suppl Figure 7b}
-pingSubset[!is.na(head_adjustRO_new) & !is.na(tail_adjustRO_new), ]%>%
+pingSubset[!is.na(anterior_hpc) & !is.na(posterior_hpc), ]%>%
   ggplot(aes(logIncome3, scale(TBX_VOCAB_THETA), col = age_categorical )) +
   stat_smooth(method  = "lm", formula = y~ x) +
 ggtheme +
@@ -1089,8 +1092,8 @@ ggsave(filename = "age_inter_income_vocab.png", width = 6, height = 3.2)
 ```
 
 ```{r Suppl Figure 8a}
-pingSubset[!is.na(head_adjustRO_new) & !is.na(tail_adjustRO_new), ]%>%
-  ggplot(aes(logIncome3, scale(head_adjustRO_new), col = age_categorical )) +
+pingSubset[!is.na(anterior_hpc) & !is.na(posterior_hpc), ]%>%
+  ggplot(aes(logIncome3, scale(anterior_hpc), col = age_categorical )) +
   stat_smooth(method  = "lm", formula = y~ x) +
 ggtheme +
   labs(y = "Anterior volumes (z scores)", col = "Age group", x = "Income") +
@@ -1100,8 +1103,8 @@ ggsave(filename = "age_inter_income_ant.png", width = 6, height = 3.2)
 ```
 
 ```{r Suppl Figure 8b}
-pingSubset[!is.na(head_adjustRO_new) & !is.na(tail_adjustRO_new), ]%>%
-  ggplot(aes(logIncome3, scale(tail_adjustRO_new), col = age_categorical )) +
+pingSubset[!is.na(anterior_hpc) & !is.na(posterior_hpc), ]%>%
+  ggplot(aes(logIncome3, scale(posterior_hpc), col = age_categorical )) +
   stat_smooth(method  = "lm", formula = y~ x) +
 ggtheme +
   labs(y = "Posterior volumes (z scores)", col = "Age group", x = "Income") +
@@ -1112,7 +1115,7 @@ ggsave(filename = "age_inter_income_post.png", width = 6, height = 3.3)
 
 ```{r Suppl Figure 9a b}
 
-ggplot(pingSubset, aes(logIncome3, head_adjustRO_newZ)) +
+ggplot(pingSubset, aes(logIncome3, anterior_hpcZ)) +
   geom_jitter(color = anteriorvolscolor, alpha  = 0.3) +
   ggtheme +
 stat_summary(fun.y = mean, geom = "point", size = 2) +
@@ -1123,7 +1126,7 @@ stat_summary(fun.y = mean, geom = "point", size = 2) +
 
 
 
-ggplot(pingSubset, aes(logIncome3, tail_adjustRO_newZ)) +
+ggplot(pingSubset, aes(logIncome3, posterior_hpcZ)) +
   geom_jitter(color = "dodgerblue", alpha  = 0.3) +
   ggtheme +
 stat_summary(fun.y = mean, geom = "point", size = 2) +
@@ -1137,14 +1140,14 @@ stat_summary(fun.y = mean, geom = "point", size = 2) +
 ```{r Suppl Figure 10a b c d}
 
 #figure 10a memory and anterior hpc volumes
-ggplot(pingSubset, aes(head_adjustRO_new, memory_residualsZ)) +
+ggplot(pingSubset, aes(anterior_hpc, memory_residualsZ)) +
   geom_jitter(color = anteriorvolscolor, alpha = 0.2) +
   ggtheme +
   stat_smooth(formula = y ~ x, method = "lm", color='black') +
   labs(x = "Volumes (mm3)", y  = "Memory (z scores)")
 
 #figure 10b memory and posterior hpc volummes
-ggplot(pingSubset, aes(tail_adjustRO_new, memory_residualsZ)) +
+ggplot(pingSubset, aes(posterior_hpc, memory_residualsZ)) +
   geom_jitter(color = "dodgerblue", alpha = 0.2) +
   ggtheme +
   stat_smooth(formula = y ~ x, method = "lm", color='dodgerblue') +
@@ -1153,7 +1156,7 @@ ggsave(filename = "memory_post.png", width = 5.5, height = 3)
 
 
 #figure 10c vocab and anterior HPC volumes
-ggplot(pingSubset, aes(head_adjustRO_new, vocab_residualsZ)) +
+ggplot(pingSubset, aes(anterior_hpc, vocab_residualsZ)) +
   geom_jitter(color = anteriorvolscolor, alpha = 0.2) +
   ggtheme +
   stat_smooth(formula = y ~ x, method = "lm", color='black') +
@@ -1161,7 +1164,7 @@ ggplot(pingSubset, aes(head_adjustRO_new, vocab_residualsZ)) +
 
 
 #figure 10d vocab and posterior hpc volumes
-ggplot(pingSubset, aes(tail_adjustRO_new, vocab_residualsZ)) +
+ggplot(pingSubset, aes(posterior_hpc, vocab_residualsZ)) +
   geom_point(color = "dodgerblue", alpha = 0.2) +
   ggtheme +
   stat_smooth(formula = y ~ x, method = "lm", color='dodgerblue') +
@@ -1171,7 +1174,7 @@ ggsave(filename = "language_ant_post.png", width = 5.5, height = 3)
 ```
 
 ```{r Suppl Figure 13a b}
-pingSubset[!is.na(tail_adjustRO_new) & !is.na(head_adjustRO_new) & !is.na(TBX_ibam_scr), processing_speed_residuals := residuals(lm(TBX_pspac_scr ~ AgeC + GenderEC))]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & !is.na(TBX_ibam_scr), processing_speed_residuals := residuals(lm(TBX_pspac_scr ~ AgeC + GenderEC))]
 
 
 ggplot(pingSubset, aes(logIncome3, processing_speed_residuals)) +
@@ -1180,7 +1183,7 @@ ggplot(pingSubset, aes(logIncome3, processing_speed_residuals)) +
   stat_smooth(formula = y ~ x, method = "lm")
 
 
-ggplot(pingSubset, aes(head_adjustRO_new, processing_speed_residuals)) +
+ggplot(pingSubset, aes(anterior_hpc, processing_speed_residuals)) +
   geom_jitter() + 
   ggtheme + 
   stat_smooth(formula = y ~ x, method = "lm")
