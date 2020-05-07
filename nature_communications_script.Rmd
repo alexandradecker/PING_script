@@ -11,12 +11,13 @@ library(lme4); library(lmerTest); library(mediation); library(tidyverse); librar
 #package versions
 #lme4_1.1-18-1; lmerTest_3.1-0; mediation_4.4.7; dtplyr_0.0.3; tidyverse_1.2.1; data.table_1.12.6; tidyr_1.0.0;  ggplot2_3.2.0;    
 #read csv
+setwd("/Users/alexandradecker/Dropbox/Projects/Ping/PING_script-master_github/")
 pingSubset <- fread("nc_data.csv")
 ```
 
 #### Analyses to assess whether income is related to episodic memory and language scores ####
 ```{r memory ~ income models}
-Income_memory.m <- lm(TBX_ibam_scr ~ logIncome3 +AgeC_test + GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summary(Income_memory.m)
+Income_memory.m <- lm(TBX_ibam_scr ~ logIncome3 +AgeC + GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summary(Income_memory.m)
 
 Income_memory_nonlinear.m <- lm(TBX_ibam_scr ~ logIncome3 +AgeC + Age2 + Age3 + GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summaryh(Income_memory_nonlinear.m)
 #income significantly correlates with memory in both models
@@ -42,7 +43,7 @@ corrected_ps[, adjusted := p.adjust(ps, method = "fdr")]
 Test how far apart in years lowest and highest income bracket are in cognitive scores
 ```{r Memory in lowest vs. higher income bracket}
 #Compute model, in which the dependent variable, memory scores, are z scores
-memory_income_gap.m <- lm(TBX_ibam_scrZ ~ logIncome3 + GenderEC + AgeC_test, data = pingSubset);summary(memory_income_gap.m) 
+memory_income_gap.m <- lm(TBX_ibam_scrZ ~ logIncome3 + GenderEC + AgeC, data = pingSubset);summary(memory_income_gap.m) 
 
 #save objects: intercept for memory scores, income, age, and the minimum and maximum values for income
 memoryScore_intercept = as.numeric(memory_income_gap.m$coefficients[1]) #intercept for memory
@@ -59,7 +60,7 @@ Memory_lag_years = (memoryZ_highestIncome -  memoryZ_lowestIncome)/age_intercept
 
 ```{r Language in lowest vs. higher income bracket}
 #Compute model, in which the dependent variable, language scores, are z scores
-language_income_gap.m <- lm(TBX_VOCAB_THETAZ ~ logIncome3 + GenderEC + AgeC_test, data = pingSubset); summary(language_income_gap.m)
+language_income_gap.m <- lm(TBX_VOCAB_THETAZ ~ logIncome3 + GenderEC + AgeC, data = pingSubset); summary(language_income_gap.m)
 
 #save objects: intercept for language scores, income, age, and the minimum and maximum values for income
 languageScore_intercept = as.numeric(language_income_gap.m$coefficients[1]) #intercept for language
@@ -130,7 +131,7 @@ Income_language_income_subsample.m <- lm(TBX_VOCAB_THETA ~ income3 * incomeSplit
 ```
 
 ```{r processing speed ~ income * income subsample }
-Income_processing_speed_income_subsample.m <- lm(TBX_pspac_scr ~ income3 * incomeSplit + AgeC+ GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summary(Income_processing_speed_income_subsample.m)
+Income_processing_speed_income_subsample.m <- lm(TBX_pspac_scr ~ income3 * incomeSplit + AgeC + GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc)]); summary(Income_processing_speed_income_subsample.m)
 #income (in raw dollars) does not affect processing speed differently in higher and lower income subsample
 ```
 
@@ -148,10 +149,10 @@ Cognitive scores ~ income + age + sex + income separately for low and high incom
 Income_memory_income_subsample_low.m <- lm(TBX_ibam_scr ~ logIncome3 + AgeC + GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == -1]); summary(Income_memory_income_subsample_low.m)
 
 #low income (added nonlinear effect of age)
-Income_memory_income_subsample_low.m_nonlinear <- lm(TBX_ibam_scr ~ logIncome3 + AgeC + Age2_test +GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == -1]); summaryh(Income_memory_income_subsample_low.m_nonlinear)
+Income_memory_income_subsample_low.m_nonlinear <- lm(TBX_ibam_scr ~ logIncome3 + AgeC + Age2 +GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == -1]); summaryh(Income_memory_income_subsample_low.m_nonlinear)
 
 #high income
-Income_memory_income_subsample_high.m <- lm(TBX_ibam_scr ~ logIncome3 + AgeC + GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == 1]); summaryh(Income_memory_income_subsample_high.m)
+Income_memory_income_subsample_high.m <- lm(TBX_ibam_scr ~ logIncome3 + AgeC  + GenderEC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == 1]); summary(Income_memory_income_subsample_high.m)
 ```
 
 ```{r vocabulary ~ income separately for low and high income subsamples}
@@ -197,7 +198,6 @@ Income_language_minority_moderation.m <- lm(TBX_VOCAB_THETA ~ logIncome3 * minor
 
 #low income
 Income_language_minority_moderation.m_low_income_subsample <- lm(TBX_VOCAB_THETA ~ logIncome3 * minority_status+ GenderEC + AgeC, data = pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & incomeSplit == -1]); summaryh(Income_language_minority_moderation.m_low_income_subsample)
-
 
 #control for minority status
 #full
@@ -378,8 +378,11 @@ longpingSubset_analysis[region == "anterior_hpc", region2 := 0]
 interaction.model = lmer(volume ~  region2  +(1|ID), data = longpingSubset_analysis); summaryh(interaction.model)
 interaction.model = lmer(volume ~  region2 + logIncome3 + AgeC + (1|ID), data = longpingSubset_analysis); summaryh(interaction.model)
 
+pingSubset[, mean(anterior_hpc, na.rm=T)]
+pingSubset[, mean(posterior_hpc, na.rm=T)]
 
-interaction.model = lmer(volume ~  logIncome3 * region2 + GenderEC + AgeC + DeviceSerialNumber2  +(1|ID), data = longpingSubset_analysis); summaryh(interaction.model)
+#age interaction
+interaction.model = lmer(volume ~  logIncome3 * region  + AgeC + GenderEC +  DeviceSerialNumber2  +(1|ID), data = longpingSubset_analysis); summary(interaction.model)
 ```
 
 ```{r make new long dataframe for creating figure of interaction between income and subregion volumes}
@@ -466,7 +469,7 @@ language_anterior.m = lm(TBX_VOCAB_THETA ~ anterior_hpc + AgeC + Age2 + GenderEC
 #low income
 language_anterior_low_income.m = lm(TBX_VOCAB_THETA ~ anterior_hpc + AgeC +  GenderEC, data = pingSubset[!is.na(posterior_hpc) & incomeSplit == -1]); summaryh(language_anterior_low_income.m)
 
-language_anterior_low_income.m = lm(TBX_VOCAB_THETA ~ anterior_hpc + AgeC +  Age2_test + GenderEC, data = pingSubset[!is.na(posterior_hpc) & incomeSplit == -1]); summaryh(language_anterior_low_income.m)
+language_anterior_low_income.m = lm(TBX_VOCAB_THETA ~ anterior_hpc + AgeC +  Age2 + GenderEC, data = pingSubset[!is.na(posterior_hpc) & incomeSplit == -1]); summaryh(language_anterior_low_income.m)
 ```
 
 ```{r vocab ~ posterior HPC}
@@ -496,7 +499,20 @@ corrected_ps[, adjusted := p.adjust(ps, method = "fdr")]
 
 Testing whether age moderates cognitive score - hpc subregion relationships
 ```{r memory ~ anterior HPC * age}
-memory_anterior_age_interaction.m = lm(TBX_ibam_scr ~ AgeC_test * anterior_hpc + GenderEC, data = pingSubset[!is.na(posterior_hpc)]); summaryh(memory_anterior_age_interaction.m)
+memory_anterior_age_interaction.m = lm(TBX_ibam_scr ~ AgeC * anterior_hpc + GenderEC, data = pingSubset[!is.na(posterior_hpc)]); summary(memory_anterior_age_interaction.m)
+```
+
+```{r memory scores ~ posterior HPC * age}
+memory_posterior_age_interaction.m = lm(TBX_ibam_scr ~  AgeC * posterior_hpc + GenderEC, data = pingSubset[!is.na(anterior_hpc)]); summaryh(memory_posterior_age_interaction.m)
+
+pingSubset$age_categorical <- relevel(as.factor(pingSubset$age_categorical), ref = "8:12")
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc), summaryh(lm(TBX_ibam_scr ~ posterior_hpc  * age_categorical + AgeC + GenderEC))]
+
+#in discrete age bins
+pingSubset[!is.na(posterior_hpc)&!is.na(anterior_hpc) & age_categorical %in% c("3:7"), summaryh(lm(TBX_ibam_scr ~ posterior_hpc+ AgeC + GenderEC))]
+pingSubset[!is.na(posterior_hpc)&!is.na(anterior_hpc) & age_categorical == "8:12", summaryh(lm(TBX_ibam_scr ~ posterior_hpc + AgeC +GenderEC))]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & age_categorical == "13:17", summaryh(lm(TBX_ibam_scr ~ posterior_hpc+ AgeC +GenderEC))]
+pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & age_categorical == "18:21", summaryh(lm(TBX_ibam_scr ~ posterior_hpc + AgeC +GenderEC))]
 ```
 
 ```{r vocab scores ~ anterior HPC * age}
@@ -514,30 +530,6 @@ pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & age_categorical %in% c
 pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & age_categorical == "8:12", summaryh(lm(TBX_VOCAB_THETA ~ posterior_hpc + GenderEC+ AgeC))]
 pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & age_categorical == "13:17", summaryh(lm(TBX_VOCAB_THETA ~ posterior_hpc+ GenderEC+ AgeC))]
 pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & age_categorical == "18:21", summaryh(lm(TBX_VOCAB_THETA ~ posterior_hpc+ GenderEC+ AgeC))]
-```
-
-```{r memory scores ~ posterior HPC * age}
-pingSubset[, .(ageround, Age_cat_round)]
-pingSubset[roundAge < 8, age_categorical:= "3:7"]
-pingSubset[roundAge > 7.99 & roundAge < 13, age_categorical:= "8:12"]
-pingSubset[roundAge > 12.99 & roundAge < 18, age_categorical:= "13:17"]
-pingSubset[roundAge > 17.99, age_categorical:= "18:21"]
-
-pingSubset[!is.na(anterior_hpc) & !is.na(posterior_hpc) & !is.na(TBX_ibam_scr), .N, by = .(age_categorical)]%>%arrange(age_categorical)
-
-memory_posterior_age_interaction.m = lm(TBX_ibam_scr ~  AgeC * posterior_hpc + GenderEC, data = pingSubset[!is.na(anterior_hpc)]); summaryh(memory_posterior_age_interaction.m)
-
-pingSubset$age_categorical <- relevel(as.factor(pingSubset$age_categorical), ref = "8:12")
-
-pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc), summaryh(lm(TBX_ibam_scr ~ posterior_hpc  * age_categorical + AgeC + GenderEC))]
-
-
-#in discrete age bins
-pingSubset[!is.na(posterior_hpc)&!is.na(anterior_hpc) & age_categorical %in% c("3:7"), summaryh(lm(TBX_ibam_scr ~ posterior_hpc + AgeC + GenderEC))]
-Age_catpingSubset[!is.na(posterior_hpc)&!is.na(anterior_hpc) & age_categorical == "8:12", summaryh(lm(TBX_ibam_scr ~ posterior_hpc + AgeC + GenderEC))]
-pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & age_categorical == "13:17", summaryh(lm(TBX_ibam_scr ~ posterior_hpc+ AgeC + GenderEC))]
-pingSubset[!is.na(posterior_hpc) & !is.na(anterior_hpc) & age_categorical == "18:21", summaryh(lm(TBX_ibam_scr ~ posterior_hpc + AgeC +GenderEC))]
-pingSubset[!is.na(posterior_hpc)&!is.na(anterior_hpc) & !is.na(TBX_ibam_scr), .N, by = age_categorical]
 ```
 
 ```{r prepare to plot the relationship between cognitive scores and hippocampal volumes}
